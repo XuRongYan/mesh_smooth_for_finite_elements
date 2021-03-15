@@ -37,12 +37,12 @@ namespace alg {
 
         std::vector<double> computePatchMinVec(const std::vector<double> &qs);
 
-        double computePatchMin(size_t vid);
+        double computePatchMin(const std::vector<double> &qs, size_t vid);
 
         void smooth_pipeline();
 
         /**
-         * compute best fit rotation and translation matrices
+         * Compute best fit rotation and translation matrices
          * @param Ce
          * @param Cr
          * @param R
@@ -56,9 +56,11 @@ namespace alg {
 
         void assembleF(const VecXf &Fe, const VecXi &vid, size_t fid);
 
+        void assembleU(const RowMat32f &Ue, const VecXi &vid);
+
         void assembleA();
 
-        void assembleB(const RowMat32f &Ue);
+        void assembleB();
 
         int buildSolveSystem(const TripletSet &Kset, const TripletSet &Aset);
 
@@ -75,6 +77,10 @@ namespace alg {
         void printOptInfo(int i);
 
     private:
+        const double t_ = 1;
+        const double E_ = 1;
+        const double v_ = 0;
+        const double l_ = 2 / (sqrt(sqrt(3)));
         SurfaceMesh mesh_;
         int max_iter_{1};
         double eps_avg_{1e-3};
@@ -85,10 +91,6 @@ namespace alg {
         size_t a_rows_{0};
         double q_min_;
         double q_avg_;
-        const double t_ = 1;
-        const double E_ = 1;
-        const double v_ = 0;
-        const double l_ = 2 / (sqrt(sqrt(3)));
         RowMat32f Cl_;
         Eigen::SparseMatrix<float> lhs_;
         TripletSet K_set_;
@@ -96,6 +98,7 @@ namespace alg {
         LLT llt_;
         LDLT ldlt_;
         VecXf F_;
+        VecXf U_;
         VecXf b_;
     };
 }

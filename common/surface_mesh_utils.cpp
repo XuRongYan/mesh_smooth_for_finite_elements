@@ -398,4 +398,19 @@ namespace common {
             mesh.garbage_collection();
         }
     }
+
+    SurfaceMesh triangle2mesh(const RowMat32f &C) {
+        SurfaceMesh mesh;
+        std::vector<Point> ps(3);
+        std::vector<SurfaceMesh::Vertex> vtx;
+        for (size_t i = 0; i < C.rows(); i++) {
+            ps[i] << C(i, 0), C(i, 1), 0;
+        }
+        for (size_t i = 0; i < 3; i++) {
+            auto v = mesh.add_vertex(ps[i]);
+            vtx.emplace_back(v);
+        }
+        mesh.add_face(vtx);
+        return mesh;
+    }
 }

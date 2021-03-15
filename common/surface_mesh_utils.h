@@ -113,6 +113,8 @@ namespace common {
                      std::vector<SurfaceMesh::Face> &faces,
                      bool collection);
 
+    SurfaceMesh triangle2mesh(const RowMat32f &C);
+
 }
 
 

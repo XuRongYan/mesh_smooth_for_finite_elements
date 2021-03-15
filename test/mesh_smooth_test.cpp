@@ -2,6 +2,7 @@
 // Created by 徐溶延local on 2021/3/14.
 //
 #include <gtest/gtest.h>
+#include <string>
 #include "algorithm/energy/quality_metric.h"
 #include "common/surface_mesh_utils.h"
 #include "common/math_utils.h"
@@ -44,11 +45,12 @@ protected:
 
 TEST_F(MeshSmoothTest, localCheckTest) {
     SurfaceMesh mesh;
-    mesh.read(DATA_SHARED_PATH"/models/pmesh000.obj");
+    mesh.read(DATA_SHARED_PATH"/models/etri.obj");
     MeshSmooth smoother(mesh);
     for (const auto &f : mesh.faces()) {
         auto vid = vertexAroundFace(mesh, f);
         auto C0 = get2DFaceCoord(mesh, f);
+        auto mesh_c0 = triangle2mesh(C0);
         double A = area(C0);
         auto Cl = smoother.Cl_;
         double s = compute2dS(A);
@@ -57,9 +59,12 @@ TEST_F(MeshSmoothTest, localCheckTest) {
         Vec2f T;
         smoother.computeRandTMatrices(C0, Cr, R, T);
         auto C = computeC(Cr, R, T);                    // Eq.29
+        auto mesh_c = triangle2mesh(C);
+        mesh_c0.write(DATA_SHARED_PATH"/output/C0_" + std::to_string(f.idx()) + ".obj");
+        mesh_c.write(DATA_SHARED_PATH"/output/C_" + std::to_string(f.idx()) + ".obj");
         double q = tri2dMetric(C);
         double Ac = area(C);
-        EXPECT_NEAR(Ac, A, 1e-8);
+        EXPECT_NEAR(Ac, A, 1e-3);
         EXPECT_FLOAT_EQ(q, 1);
     }
 }

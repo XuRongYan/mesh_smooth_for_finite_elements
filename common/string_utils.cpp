@@ -13,7 +13,9 @@ std::string common::findSuffix(const std::string &s) {
 
 std::string common::findPrefix(const std::string &s) {
 	size_t suffix_id = s.rfind('.');
-	return s.substr(0, suffix_id);
+    int divide = s.rfind('/');
+    if (divide == -1) divide = 0;
+	return s.substr(divide + 1, suffix_id);
 }
 
 void common::trimLeftTrailingSpaces(std::string &input) {

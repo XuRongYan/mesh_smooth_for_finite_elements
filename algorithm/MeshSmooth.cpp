@@ -7,6 +7,7 @@
 #include "energy/quality_metric.h"
 #include "common/surface_mesh_utils.h"
 #include "common/math_utils.h"
+#include "common/timer.h"
 
 
 using namespace common;
@@ -23,7 +24,11 @@ namespace alg {
                                            alpha_(alpha) {
         // initial quality calculations
         F_.resize(2 * mesh_.n_vertices());
+        F_.setZero();
+        U_.resize(2 * mesh_.n_vertices());
+        U_.setZero();
         b_.resize(2 * mesh_.n_vertices());
+        b_.setZero();
         qs_ = computeQs();
         q_patch_min_ = computePatchMinVec(qs_);
         q_min_ = computeQMin();
@@ -32,7 +37,7 @@ namespace alg {
                l_, 0,
                0.5 * l_, 0.5 * sqrt(3) * l_;
 
-        printOptInfo(-1);
+//        printOptInfo(-1);
     }
 
     MeshSmooth::MeshSmooth(const MeshSmooth &smooth) {
@@ -86,16 +91,16 @@ namespace alg {
         std::vector<double> patch_min;
         patch_min.reserve(qs.size());
         for (size_t i = 0; i < mesh_.n_vertices(); i++) {
-            patch_min.emplace_back(computePatchMin(i));
+            patch_min.emplace_back(computePatchMin(qs, i));
         }
         return patch_min;
     }
 
-    double MeshSmooth::computePatchMin(size_t vid) {
+    double MeshSmooth::computePatchMin(const std::vector<double> &qs, size_t vid) {
         const SurfaceMesh::Vertex v(vid);
         double q_min = 1.0;
         for (const auto &f : mesh_.faces(v)) {
-            double q = qs_[f.idx()];
+            double q = qs[f.idx()];
             q_min = std::min(q_min, q);
         }
         return q_min;
@@ -120,6 +125,8 @@ namespace alg {
                 auto Ke = computeKe(C0, t_, E_, v_);
                 // compute Fe
                 auto Fe = computeFe(Ke, Ue);
+                // Assemble Ue into global U vector
+                assembleU(Ue, vid);
                 // Assemble Ke into global K matrix
                 assembleK(Ke, vid, f.idx());
                 // Assemble Fe into global F vector
@@ -135,13 +142,14 @@ namespace alg {
             auto rhs = buildRhs(F_, b_);
             // solve
             auto U = solve(rhs);
+
             // update mesh coords
             updateMesh(U);
             qs_ = computeQs();
             q_patch_min_ = computePatchMinVec(qs_);
             reset();
             bool is_converge = isConverge();
-            printOptInfo(iter);
+//            printOptInfo(iter);
             if (is_converge)
                 break;
         }
@@ -172,10 +180,18 @@ namespace alg {
     }
 
     void MeshSmooth::assembleF(const VecXf &Fe, const VecXi &vid, size_t fid) {
-        F_.setZero();
+//        std::cout << Fe << std::endl;
         for (size_t i = 0; i < Fe.size(); i++) {
             size_t idx = 2 * vid[i / 2] + (i % 2);
             F_[idx] += Fe[i];
+        }
+    }
+
+    void MeshSmooth::assembleU(const RowMat32f &Ue, const VecXi &vid) {
+        for (size_t i = 0; i < Ue.rows(); i++) {
+            for (size_t j = 0; j < Ue.cols(); j++) {
+                U_[2 * vid[i] + j] = Ue(i, j);
+            }
         }
     }
 
@@ -186,26 +202,16 @@ namespace alg {
         for (const auto &v : mesh_.vertices()) {
             if (mesh_.is_boundary(v)) {
                 // A
-                A_set_.emplace_back(x + 2 * a_rows_, 2 * v.idx(), 1);
-                A_set_.emplace_back(x + 2 * a_rows_ + 1, 2 * v.idx() + 1, 1);
-                // At
-                A_set_.emplace_back(2 * v.idx(), y + 2 * a_rows_, 1);
-                A_set_.emplace_back(2 * v.idx() + 1, y + 2 * a_rows_ + 1, 1);
+                A_set_.emplace_back(2 * a_rows_, 2 * v.idx(), 1);
+                A_set_.emplace_back(2 * a_rows_ + 1, 2 * v.idx() + 1, 1);
                 a_rows_++;
             }
         }
     }
 
-    void MeshSmooth::assembleB(const RowMat32f &Ue) {
+    void MeshSmooth::assembleB() {
         b_.resize(2 * a_rows_);
         b_.setZero();
-        int i = 0;
-        for (const auto &v : mesh_.vertices()) {
-            if (mesh_.is_boundary(v)) {
-
-
-            }
-        }
     }
 
     int MeshSmooth::buildSolveSystem(const TripletSet &Kset, const TripletSet &Aset) {
@@ -215,38 +221,36 @@ namespace alg {
         const size_t a_cols = 2 * mesh_.n_vertices();
         TripletSet lhs_set;
         lhs_set.insert(lhs_set.end(), Kset.begin(), Kset.end());
-        lhs_set.insert(lhs_set.end(), Aset.begin(), Aset.end());
-
-        lhs_.resize(k_rows + a_rows, k_cols + a_rows);
+        Eigen::SparseMatrix<float> A(a_rows, k_rows);
+        lhs_.resize(k_rows, k_cols);
         lhs_.setFromTriplets(lhs_set.begin(), lhs_set.end());
-        ldlt_.compute(lhs_);
+        A.setFromTriplets(Aset.begin(), Aset.end());
+//        Eigen::SparseMatrix<float> At = A.transpose();
+//        Eigen::SparseMatrix<float> pos_constrain = 1e6 * At * A;
+//        std::cout << lhs_ << std::endl;
+        ldlt_.compute(lhs_ + 1e8 * A.transpose() * A);
         return ldlt_.info() == Eigen::Success;
     }
 
     VecXf MeshSmooth::buildRhs(const VecXf &F, const VecXf &b) {
-        VecXf rhs(F.size() + b.size());
+
+        VecXf rhs(F.size());
         for (size_t i = 0; i < F.size(); i++) {
             rhs[i] = F[i];
         }
-        for (size_t i = F.size(); i < rhs.size(); i++) {
-            rhs[i] = b[i - F.size()];
-        }
-//        std::cout << rhs.transpose() << std::endl;
         return rhs;
     }
 
     RowMatf MeshSmooth::solve(const VecXf &rhs) {
         const size_t n = 2 * mesh_.n_vertices();
         Eigen::VectorXf b = rhs.transpose();
+//        std::cout << b << std::endl;
         Eigen::VectorXf U_lambda = ldlt_.solve(b);
 
         if (ldlt_.info() != Eigen::Success) {
             spdlog::error("solve failed");
         }
-        std::cout << (lhs_ * U_lambda - b).norm() << std::endl;
-//        std::cout << U_lambda << std::endl;
         Eigen::VectorXf Utmp = U_lambda.block(0, 0, n, 1);
-//        std::cout << Utmp << std::endl;
         return Eigen::Map<RowMatf>(Utmp.data(), Utmp.size() / 2, 2);
     }
 
@@ -259,6 +263,11 @@ namespace alg {
             displacement << U.row(i).x(), U.row(i).y(), 0;
             p += displacement;
         }
+        SurfaceMesh::Vertex v(2);
+        auto &p = mesh_.position(v);
+        Point delta;
+        delta << U(0, 0), U(0, 1), 0;
+        p += delta;
         auto new_qs = computeQs();
         auto new_patch_min = computePatchMinVec(new_qs);
 //        for (size_t i = 0; i < U.rows(); i++) {
@@ -286,8 +295,9 @@ namespace alg {
     void MeshSmooth::reset() {
         K_set_.clear();
         A_set_.clear();
+        F_.setZero();
         lhs_.setZero();
-
+        U_.setZero();
     }
 
     void MeshSmooth::printOptInfo(int i) {
@@ -297,6 +307,4 @@ namespace alg {
             spdlog::info("iter {}: q_avg = {}, q_min = {}", i, q_avg_, q_min_);
         }
     }
-
-
 } // namespace alg
