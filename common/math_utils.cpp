@@ -7,15 +7,15 @@
 
 namespace common {
     namespace math {
-        double angle(const Vec3f &A, const Vec3f &B) {
+        double angle(const RowVec3f &A, const RowVec3f &B) {
             return atan2(A.cross(B).norm(), A.dot(B));
         }
 
-        double angle2D(const Vec2f &A, const Vec2f &B) {
+        double angle2D(const RowVec2f &A, const RowVec2f &B) {
             return atan2(cross2D(A, B).norm(), A.dot(B));
         }
 
-        double angle(const Vec3f &A, const Vec3f &B, const Vec3f &C) {
+        double angle(const RowVec3f &A, const RowVec3f &B, const RowVec3f &C) {
             return angle(B - A, C - A);
         }
 
@@ -44,12 +44,12 @@ namespace common {
             return Cl;
         }
 
-        double cosOf2Vec(const Vec3f &A, const Vec3f &B) {
+        double cosOf2Vec(const RowVec3f &A, const RowVec3f &B) {
             return A.dot(B) / (A.norm() * B.norm());
         }
 
-        Vec3f cross2D(const Vec2f &a, const Vec2f &b) {
-            Vec3f v;
+        RowVec3f cross2D(const RowVec2f &a, const RowVec2f &b) {
+            RowVec3f v;
             v.setZero();
             v[2] = a.x() * b.y() - a.y() * b.x();
             return v;

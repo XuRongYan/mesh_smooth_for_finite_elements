@@ -8,7 +8,15 @@
 #include "types.h"
 
 namespace common {
-    VecXf mat2vec(RowMatf &mat);
+    RowVecXf mat2vec(RowMatf &mat);
+
+    inline RowVecXf col2row(const VecXf &vec) {
+        return vec.transpose();
+    }
+
+    inline VecXf row2col(const RowVecXf &vec) {
+        return vec.transpose();
+    }
 }
 
 

@@ -50,13 +50,13 @@ namespace alg {
          * @return
          */
         int computeRandTMatrices(const RowMat32f &Ce, const RowMat32f &Cr,
-                                 RowMat2f &R, Vec2f &T);
+                                 RowMat2f &R, RowVec2f &T);
 
-        void assembleK(const RowMatf &Ke, const VecXi &vid, size_t fid);
+        void assembleK(const RowMatf &Ke, const RowVecXi &vid, size_t fid);
 
-        void assembleF(const VecXf &Fe, const VecXi &vid, size_t fid);
+        void assembleF(const RowVecXf &Fe, const RowVecXi &vid, size_t fid);
 
-        void assembleU(const RowMat32f &Ue, const VecXi &vid);
+        void assembleU(const RowMat32f &Ue, const RowVecXi &vid);
 
         void assembleA();
 
@@ -64,9 +64,9 @@ namespace alg {
 
         int buildSolveSystem(const TripletSet &Kset, const TripletSet &Aset);
 
-        VecXf buildRhs(const VecXf &F, const VecXf &b);
+        RowVecXf buildRhs(const RowVecXf &F, const RowVecXf &b);
 
-        RowMatf solve(const VecXf &rhs);
+        RowMatf solve(const RowVecXf &rhs);
 
         int updateMesh(const RowMatf &U);
 
@@ -97,9 +97,9 @@ namespace alg {
         TripletSet A_set_;
         LLT llt_;
         LDLT ldlt_;
-        VecXf F_;
-        VecXf U_;
-        VecXf b_;
+        RowVecXf F_;
+        RowVecXf U_;
+        RowVecXf b_;
     };
 }
 

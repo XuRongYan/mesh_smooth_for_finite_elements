@@ -25,12 +25,19 @@ using ColMat3f = Eigen::Matrix<float, 3, 3, Eigen::ColMajor>;
 using ColMat34i = Eigen::Matrix<size_t, 3, 4, Eigen::ColMajor>;
 using ColMat34f = Eigen::Matrix<float, 3, 4, Eigen::ColMajor>;
 using ColMat43f = Eigen::Matrix<float, 4, 3, Eigen::ColMajor>;
-using Vec2f = Eigen::RowVector2f;
-using Vec3f = Eigen::RowVector3f;
-using Vec3i = Eigen::RowVector3i;
-using VecXf = Eigen::RowVectorXf;
-using Vec4i = Eigen::Matrix<int, 4, 1, Eigen::RowMajor>;
-using VecXi = Eigen::RowVectorXi;
+using RowVec2f = Eigen::RowVector2f;
+using RowVec3f = Eigen::RowVector3f;
+using RowVec3i = Eigen::RowVector3i;
+using RowVec4i = Eigen::Matrix<int, 4, 1, Eigen::RowMajor>;
+using RowVecXf = Eigen::RowVectorXf;
+using RowVecXi = Eigen::RowVectorXi;
+using Vec2f = Eigen::Vector2f;
+using Vec3f = Eigen::Vector3f;
+using Vec3i = Eigen::Vector3i;
+using Vec4i = Eigen::Vector4i;
+using VecXf = Eigen::VectorXf;
+using VecXi = Eigen::VectorXi;
+
 
 namespace common {
     const double EPS3 = 1e-2;

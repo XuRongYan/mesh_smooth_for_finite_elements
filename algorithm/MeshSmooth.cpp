@@ -117,7 +117,7 @@ namespace alg {
                 double s = compute2dS(A);
                 auto Cr = computeRefLocalCoord(Cl_, s, alpha_);
                 RowMat2f R;
-                Vec2f T;
+                RowVec2f T;
                 computeRandTMatrices(C0, Cr, R, T);
                 auto C = computeC(Cr, R, T);                    // Eq.29
                 auto Ue = computeUe(C, C0);
@@ -156,7 +156,7 @@ namespace alg {
     }
 
     int MeshSmooth::computeRandTMatrices(const RowMat32f &Ce, const RowMat32f &Cr,
-                                         RowMat2f &R, Vec2f &T) {
+                                         RowMat2f &R, RowVec2f &T) {
         auto Ce_avg = computeAvgCoord(Ce);      // Eq.26
         auto Cr_avg = computeAvgCoord(Cr);      // Eq.27
         assert(Ce_avg.size() == 2);
@@ -169,7 +169,7 @@ namespace alg {
         return 1;
     }
 
-    void MeshSmooth::assembleK(const RowMatf &Ke, const VecXi &vid, size_t fid) {
+    void MeshSmooth::assembleK(const RowMatf &Ke, const RowVecXi &vid, size_t fid) {
         for (size_t i = 0; i < Ke.rows(); i++) {
             for (size_t j = 0; j < Ke.cols(); j++) {
                 int row = 2 * vid[i / 2] + (i % 2);
@@ -179,7 +179,7 @@ namespace alg {
         }
     }
 
-    void MeshSmooth::assembleF(const VecXf &Fe, const VecXi &vid, size_t fid) {
+    void MeshSmooth::assembleF(const RowVecXf &Fe, const RowVecXi &vid, size_t fid) {
 //        std::cout << Fe << std::endl;
         for (size_t i = 0; i < Fe.size(); i++) {
             size_t idx = 2 * vid[i / 2] + (i % 2);
@@ -187,7 +187,7 @@ namespace alg {
         }
     }
 
-    void MeshSmooth::assembleU(const RowMat32f &Ue, const VecXi &vid) {
+    void MeshSmooth::assembleU(const RowMat32f &Ue, const RowVecXi &vid) {
         for (size_t i = 0; i < Ue.rows(); i++) {
             for (size_t j = 0; j < Ue.cols(); j++) {
                 U_[2 * vid[i] + j] = Ue(i, j);
@@ -232,16 +232,16 @@ namespace alg {
         return ldlt_.info() == Eigen::Success;
     }
 
-    VecXf MeshSmooth::buildRhs(const VecXf &F, const VecXf &b) {
+    RowVecXf MeshSmooth::buildRhs(const RowVecXf &F, const RowVecXf &b) {
 
-        VecXf rhs(F.size());
+        RowVecXf rhs(F.size());
         for (size_t i = 0; i < F.size(); i++) {
             rhs[i] = F[i];
         }
         return rhs;
     }
 
-    RowMatf MeshSmooth::solve(const VecXf &rhs) {
+    RowMatf MeshSmooth::solve(const RowVecXf &rhs) {
         const size_t n = 2 * mesh_.n_vertices();
         Eigen::VectorXf b = rhs.transpose();
 //        std::cout << b << std::endl;

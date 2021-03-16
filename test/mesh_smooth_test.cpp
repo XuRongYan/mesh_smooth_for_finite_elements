@@ -56,7 +56,7 @@ TEST_F(MeshSmoothTest, localCheckTest) {
         double s = compute2dS(A);
         auto Cr = computeRefLocalCoord(Cl, s, smoother.alpha_);
         RowMat2f R;
-        Vec2f T;
+        RowVec2f T;
         smoother.computeRandTMatrices(C0, Cr, R, T);
         auto C = computeC(Cr, R, T);                    // Eq.29
         auto mesh_c = triangle2mesh(C);

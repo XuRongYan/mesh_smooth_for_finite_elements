@@ -6,10 +6,10 @@
 
 using namespace common::math;
 
-VecXf computeAvgCoord(const RowMatf &C) {
+RowVecXf computeAvgCoord(const RowMatf &C) {
     const size_t d = C.cols();
     const size_t n = C.rows();
-    VecXf avg_coord(d);
+    RowVecXf avg_coord(d);
     avg_coord.setZero();
     for (size_t i = 0; i < n; i++) {
         avg_coord += C.row(i);
@@ -18,7 +18,7 @@ VecXf computeAvgCoord(const RowMatf &C) {
     return avg_coord;
 }
 
-RowMat32f computeD(const RowMat32f &C, const Vec2f &C_avg) {
+RowMat32f computeD(const RowMat32f &C, const RowVec2f &C_avg) {
     RowMat32f D = C;
     for (size_t i = 0; i < D.rows(); i++) {
         D.row(i) -= C_avg;
@@ -42,7 +42,7 @@ RowMat2f computeR(const RowMat2f &H) {
     return R;
 }
 
-RowMat32f computeTm(const Vec2f &T) {
+RowMat32f computeTm(const RowVec2f &T) {
     RowMat32f Tm;
     for (size_t i = 0; i < 3; i++) {
         Tm.row(i) = T;

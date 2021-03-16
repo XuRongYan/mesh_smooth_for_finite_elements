@@ -12,49 +12,47 @@
 #include <Eigen/Dense>
 #include "types.h"
 
-namespace common {
-    namespace math {
-        double angle(const Vec3f &A, const Vec3f &B);
+namespace common::math {
+    double angle(const RowVec3f &A, const RowVec3f &B);
 
-        double angle2D(const Vec2f &A, const Vec2f &B);
+    double angle2D(const RowVec2f &A, const RowVec2f &B);
 
-        double angle(const Vec3f &A, const Vec3f &B, const Vec3f &C);
+    double angle(const RowVec3f &A, const RowVec3f &B, const RowVec3f &C);
 
-        double area(const RowMat32f &e);
+    double area(const RowMat32f &e);
 
-        double perimeter(const RowMat32f &e);
+    double perimeter(const RowMat32f &e);
 
-        RowMat32f localCoord2d(const RowMat32f &e);
+    RowMat32f localCoord2d(const RowMat32f &e);
 
-        double cosOf2Vec(const Vec3f &A, const Vec3f &B);
+    double cosOf2Vec(const RowVec3f &A, const RowVec3f &B);
 
-        Vec3f cross2D(const Vec2f &a, const Vec2f &b);
+    RowVec3f cross2D(const RowVec2f &a, const RowVec2f &b);
 
-        bool intersect(const Eigen::Vector3f &A,
-                       const Eigen::Vector3f &B,
-                       const Eigen::Vector3f &C,
-                       const Eigen::Vector3f &D);
+    bool intersect(const Eigen::Vector3f &A,
+                   const Eigen::Vector3f &B,
+                   const Eigen::Vector3f &C,
+                   const Eigen::Vector3f &D);
 
-        double distanceToEdge(const Eigen::Vector3f &p, const Eigen::Vector3f &A, const Eigen::Vector3f &B);
+    double distanceToEdge(const Eigen::Vector3f &p, const Eigen::Vector3f &A, const Eigen::Vector3f &B);
 
-        long mod(long i, long size);
+    long mod(long i, long size);
 
-        inline size_t prev(size_t i, size_t n) {
-            return i == 0 ? n - 1 : i - 1;
-        }
+    inline size_t prev(size_t i, size_t n) {
+        return i == 0 ? n - 1 : i - 1;
+    }
 
-        inline size_t next(size_t i, size_t n) {
-            return (i + 1) % n;
-        }
+    inline size_t next(size_t i, size_t n) {
+        return (i + 1) % n;
+    }
 
-        inline size_t prev(size_t i, size_t step, size_t n) {
-            return step == 1 ? prev(i, n) : prev(prev(i, n), step - 1, n);
-        }
+    inline size_t prev(size_t i, size_t step, size_t n) {
+        return step == 1 ? prev(i, n) : prev(prev(i, n), step - 1, n);
+    }
 
-        inline size_t next(size_t i, size_t step, size_t n) {
-            return step == 1 ? next(i, n) : next(next(i, n), step - 1, n);
-        }
-    } // namespace math
+    inline size_t next(size_t i, size_t step, size_t n) {
+        return step == 1 ? next(i, n) : next(next(i, n), step - 1, n);
+    }
 } // namespace common
 
 

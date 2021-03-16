@@ -57,7 +57,7 @@ inline RowMat32f computeLocalDisplacement(const RowMat32f &C, const RowMat32f &C
  * @param C
  * @return
  */
-VecXf computeAvgCoord(const RowMatf &C);
+RowVecXf computeAvgCoord(const RowMatf &C);
 
 /**
  * reference to Eq.24 & Eq.25
@@ -65,7 +65,7 @@ VecXf computeAvgCoord(const RowMatf &C);
  * @param C_avg
  * @return
  */
-RowMat32f computeD(const RowMat32f &C, const Vec2f &C_avg);
+RowMat32f computeD(const RowMat32f &C, const RowVec2f &C_avg);
 
 /**
  * reference to Eq.23
@@ -91,7 +91,7 @@ RowMat2f computeR(const RowMat2f &H);
  * @param Cr_avg
  * @return
  */
-inline Vec2f computeT(const RowMat2f &R, const Vec2f &Ce_avg, const Vec2f &Cr_avg) {
+inline RowVec2f computeT(const RowMat2f &R, const RowVec2f &Ce_avg, const RowVec2f &Cr_avg) {
     return (Ce_avg.transpose() - R * Cr_avg.transpose()).transpose();
 }
 
@@ -100,7 +100,7 @@ inline Vec2f computeT(const RowMat2f &R, const Vec2f &Ce_avg, const Vec2f &Cr_av
  * @param T
  * @return
  */
-RowMat32f computeTm(const Vec2f &T);
+RowMat32f computeTm(const RowVec2f &T);
 
 /**
  * reference to Eq.29
@@ -109,7 +109,7 @@ RowMat32f computeTm(const Vec2f &T);
  * @param T
  * @return
  */
-inline RowMat32f computeC(const RowMat32f &Cr, const RowMat2f &R, const Vec2f &T) {
+inline RowMat32f computeC(const RowMat32f &Cr, const RowMat2f &R, const RowVec2f &T) {
     auto Tm = computeTm(T);
     return Cr * R.transpose() + Tm;
 }
@@ -139,10 +139,10 @@ RowMatf computeKe(const RowMat32f &Ce, double t, double E, double v);
  * @param extend_approach
  * @return
  */
-inline VecXf computeFe(const RowMatf &Ke, const RowMat32f &Ue) {
+inline RowVecXf computeFe(const RowMatf &Ke, const RowMat32f &Ue) {
     assert(Ke.rows() == 6 && Ke.cols() == 6);
     RowMatf Utmp = Ue;
-    VecXf U = common::mat2vec(Utmp);
+    RowVecXf U = common::mat2vec(Utmp);
     return (Ke * U.transpose()).transpose();
 }
 
@@ -154,7 +154,7 @@ inline VecXf computeFe(const RowMatf &Ke, const RowMat32f &Ue) {
  * @param q_min
  * @return
  */
-inline VecXf computeFe(const RowMat3f &Ke, const RowMat32f &Ue, double q, double q_min) {
+inline RowVecXf computeFe(const RowMat3f &Ke, const RowMat32f &Ue, double q, double q_min) {
     return (1 - q) / (q - q_min) * computeFe(Ke, Ue);
 }
 

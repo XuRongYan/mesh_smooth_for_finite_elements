@@ -6,7 +6,7 @@
 #include <Eigen/Dense>
 
 namespace common {
-    VecXf mat2vec(RowMatf &mat) {
-        return Eigen::Map<VecXf>(mat.data(), 1, mat.size());
+    RowVecXf mat2vec(RowMatf &mat) {
+        return Eigen::Map<RowVecXf>(mat.data(), 1, mat.size());
     }
 }

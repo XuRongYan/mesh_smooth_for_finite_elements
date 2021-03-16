@@ -49,7 +49,7 @@ TEST_F(CommonTest, localCoord2dTest) {
 
 TEST_F(CommonTest, avgCoordTest) {
     auto avg_coord = computeAvgCoord(tri5);
-    Vec2f ref_coord;
+    RowVec2f ref_coord;
     ref_coord << 1, 1;
     EXPECT_MAT_EQ(avg_coord, ref_coord);
 }
